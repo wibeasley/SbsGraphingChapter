@@ -1,0 +1,94 @@
+<!-- Specify the report's official name, goal & description. -->
+# Graphs for the First Section of the SBS Chapter
+**Report Description**: {{Put a description here, once we know more about it.}}
+
+```{r, echo=FALSE} 
+  #Set the chunks' working directory to the repository's base directory; this assumes the report is nested inside of two directories.
+  opts_knit$set(root.dir='../../')  #Don't combine this call with any other chunk -espeically one that uses file paths.
+```
+<!-- Point knitr to the underlying code file so it knows where to look for the chunks. -->
+```{r SetOtherOptions , echo=FALSE, message=F}
+  opts_chunk$set(
+    comment="" 
+    , fig.width = 8
+    , fig.height = 10
+    , fig.path = 'FigureRmd/' 
+  )
+  options(width=150)
+                 
+  # require(xtable)
+  # require(scales)
+  pathSourceCode <- "./Reports/Section1/Section1.R"
+  read_chunk(pathSourceCode) 
+```
+
+<!-- Load the packages.  Suppress the output when loading packages. --> 
+```{r LoadPackages, echo=FALSE, message=FALSE}
+```
+
+<!-- Load any Global Functions declared in the R file.  Suppress the output. --> 
+```{r DeclareGlobalFunctions, echo=FALSE, message=FALSE}
+```
+
+<!-- Declare any global functions specific to a Rmd output.  Suppress the output. --> 
+```{r, echo=FALSE, message=FALSE}
+```
+
+<!-- Load the dataset.   -->
+```{r LoadDS, echo=F, results='hide', message=F}
+```
+
+<!-- Tweak the dataset.   -->
+```{r TweakDS, echo=F, results='hide', message=F}
+```
+
+<!-- Prepare the parameters to be sent to the MCMC.   -->
+```{r PrepareMcmc, echo=FALSE, fig.width=10}
+```
+
+## 1. Parameters
+**chainCount**: `r chainCount`
+
+**iterationCount**: `r iterationCount` (The number used for estimate -ie, it doesn't include burn-in.)
+
+**burninCount**: `r burninCount`
+
+**parametersToTrack**: `r paste(parametersToTrack, collapse=", ")`
+
+**dataList**: `r cat(str(dataList))`
+```{r, echo=FALSE}
+  str(dataList)
+```
+
+## 2. OpenBUGS
+not run
+<!--
+```{r RunBugs, echo=FALSE}
+```
+-->
+
+## 3. JAGS
+
+```{r RunJags, echo=FALSE}
+```
+### For and explanation of the graphs, see http://xavier-fim.net/packages/ggmcmc/
+```{r GraphJagsSelect, echo=FALSE, fig.height=8}
+```
+
+```{r GraphJagsAll, echo=FALSE, fig.height=16}
+```
+
+
+## 4. Display Syntax of Models
+
+**fileNameModel**: `r fileNameModel`
+
+```{r DisplayModels, echo=FALSE}
+```
+
+
+## --Session Info--
+```{r settings, echo=FALSE}
+cat("Report created by", Sys.info()["user"], "at", strftime(Sys.time(), "%c, %z"))
+sessionInfo()
+```

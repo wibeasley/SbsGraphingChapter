@@ -1,5 +1,3 @@
-# History files
+# R and RStudio Files
 .Rhistory
-
-# Example code in package build process
-*-Ex.R
+.Rproj.user
