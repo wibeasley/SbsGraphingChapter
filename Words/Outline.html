@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<!-- saved from url=(0014)about:internet -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="x-ua-compatible" content="IE=9" >
+
+<title>Abstract</title>
+
+<style type="text/css">
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 12px;
+   margin: 8px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+h1 { 
+   font-size:2.2em; 
+}
+
+h2 { 
+   font-size:1.8em; 
+}
+
+h3 { 
+   font-size:1.4em; 
+}
+
+h4 { 
+   font-size:1.0em; 
+}
+
+h5 { 
+   font-size:0.9em; 
+}
+
+h6 { 
+   font-size:0.8em; 
+}
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+pre {	
+   margin-top: 0;
+   max-width: 95%;
+   border: 1px solid #ccc;
+   white-space: pre-wrap;
+}
+
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code.r, code.cpp {
+   background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * { 
+      background: transparent !important; 
+      color: black !important; 
+      filter:none !important; 
+      -ms-filter: none !important; 
+   }
+
+   body { 
+      font-size:12pt; 
+      max-width:100%; 
+   }
+       
+   a, a:visited { 
+      text-decoration: underline; 
+   }
+
+   hr { 
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote { 
+      padding-right: 1em; 
+      page-break-inside: avoid; 
+   }
+
+   tr, img { 
+      page-break-inside: avoid; 
+   }
+
+   img { 
+      max-width: 100% !important; 
+   }
+
+   @page :left { 
+      margin: 15mm 20mm 15mm 10mm; 
+   }
+     
+   @page :right { 
+      margin: 15mm 10mm 15mm 20mm; 
+   }
+
+   p, h2, h3 { 
+      orphans: 3; widows: 3; 
+   }
+
+   h2, h3 { 
+      page-break-after: avoid; 
+   }
+}
+
+</style>
+
+
+
+
+
+</head>
+
+<body>
+<h1>Abstract</h1>
+
+<p>GDA isn&#39;t a tool appropriate for just some types of behavioral research questions.  We argue that it should be integrated into almost every step of a project, from the initial exploration of observed data after the first few subjects, to the final presentation of a project&#39;s insights.</p>
+
+<h1>Exploration</h1>
+
+<h3>Benefits of Eager Exploration</h3>
+
+<ol>
+<li>Produce insights not possible with myopic CFA.</li>
+<li>Verify the CFA assumptions are reasonable (eg, homogeneity of variance).</li>
+<li>Due diligence that the data collection didn&#39;t produce substantial artifacts.  When grants require hundreds of hours of data collection and tens of thousands of federal dollars (and usually and order of magnitude more), some might argue that it&#39;s the researcher&#39;s obligation to thoroughly check for unexpected patterns.</li>
+</ol>
+
+<h3>Exploration Workflow</h3>
+
+<p>Your workflow should allow exploration of many different arrangements and perspectives quickly.  It&#39;s important to move quickly because it&#39;s easier to compare the variations in your memory, and there are always competing demands on your research time.  </p>
+
+<ol>
+<li><em>Flexibility</em>: As the exploration progresses, it should be almost effortless to swap variables, and translate between different types of graphs (eg, starting with a univariate scatterplot and advancing to a two-dimensional contour plot with facets){Insert a figure}.  With <code>ggplot2</code>, this typically requires inserting two lines of code and modifying a third. {Insert a code snippet}.  The brilliance of Wilkinson&#39;s Grammar is that the underlying structure taps into the commonalities bla bla bla. With many other libraries, you&#39;d discard your <code>Histogram</code> code, and need to start over with a <code>ContourPlot</code>.<br/></li>
+<li><em>Cohesion at a single time point</em>: Behavioral research commonly has datasets with more than 10 variables.  We advocate that all of the univariate patterns be explored, and many of the bivariate and trivariate relationships be graphed at least once.  However with just 10 variables, 175 graphs are required to cover the trivariate space ((10 1) + (10 2) + (10 3) = 175).  With a modest 20 variables, the count accelerates to 1,350.  Even if the entire trivariate space isn&#39;t covered, it&#39;s safe to say that most modestly-sized research projects should produce at least 100 graphs.  R&#39;s literate programming tools (notably Sweave and knitr) handle this well, and can combine hundreds of graphs in a single pdf or html document.  It&#39;s easy to provide context by including prose in between the graphs.  This is huge improvement over managing dozens of loose png files, even if only one or two project members need to see them.</li>
+<li><em>Cohesion over time</em>: Something is wrong if you produce your graphs only once.  Things will inevitably need to be revised, either because you&#39;re monitoring the patterns while data are being collected, or you choose to subset the sample or transform some variable after the initial exploration.  Many have found source code repositories to be an ideal for change management.  It also allows multiple members of you research team to contribute in parallel, without the clumsiness of emailing file versions or ad-hoc versioning on a shared file server.  Many free version-control services are available, and GitHub is currently the most popular (cite two C&amp;H RR books)</li>
+<li><em>Tied to a data manipulation program</em>:  Many times an productive graphical exploration depends on the data manipulation more than the visualization code.</li>
+</ol>
+
+<h1>Presentation</h1>
+
+<h1>Interactivity</h1>
+
+<h1>Resolution</h1>
+
+<h1>References</h1>
+
+<h1>Will&#39;s GDA World View</h1>
+
+<p>I had been very comfortable in my graphics reality, which was split into two (oversimplified) worlds.  The first used a Cleveland/Tukey-inspired approach where the researcher tenaciously attacks a dataset from as many angles and facets that are feasible in a given time.  Most of these graphs are intended for the internal research team, and will not be viewed by unfamiliar audiences.  </p>
+
+<p>The second world used a Tufte-inspired approach where the researcher tries to communicate novel and complex relationships with only a handful of crafted graphs.  Not everything should not be an elegant Tufte graph appropriate for a wide audience; it would take too much time away from other important activities, such as Cleveland activities.</p>
+
+<p>The 2012 election coverage (eg, <a href="http://elections.nytimes.com/2012/results/president/scenarios">http://elections.nytimes.com/2012/results/president/scenarios</a>) exposed me to a third world &ndash;where interactive graphics didn’t require sophisticated audiences.  Until then, I’d valued interactive graphics mostly from the Cleveland perspective.  I hadn’t appreciated how effectively they could communicate concepts and relationships.  This is probably my primary pre-identified goal for this workshop.  I’d like to learn how your experts see the fit between these types of media and the types of audiences.  A secondary goal is to learn more about ideal interactive visualizations (if you had a week to develop one very public display), and learn more about less important interactive visualizations (if you had 8 hours to develop multiple displays).</p>
+
+</body>
+
+</html>
+
