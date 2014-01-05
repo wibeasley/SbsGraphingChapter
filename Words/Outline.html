@@ -164,16 +164,53 @@ hr {
 <li><em>Flexibility</em>: As the exploration progresses, it should be almost effortless to swap variables, and translate between different types of graphs (eg, starting with a univariate scatterplot and advancing to a two-dimensional contour plot with facets){Insert a figure}.  With <code>ggplot2</code>, this typically requires inserting two lines of code and modifying a third. {Insert a code snippet}.  The brilliance of Wilkinson&#39;s Grammar is that the underlying structure taps into the commonalities bla bla bla. With many other libraries, you&#39;d discard your <code>Histogram</code> code, and need to start over with a <code>ContourPlot</code>.<br/></li>
 <li><em>Cohesion at a single time point</em>: Behavioral research commonly has datasets with more than 10 variables.  We advocate that all of the univariate patterns be explored, and many of the bivariate and trivariate relationships be graphed at least once.  However with just 10 variables, 175 graphs are required to cover the trivariate space ((10 1) + (10 2) + (10 3) = 175).  With a modest 20 variables, the count accelerates to 1,350.  Even if the entire trivariate space isn&#39;t covered, it&#39;s safe to say that most modestly-sized research projects should produce at least 100 graphs.  R&#39;s literate programming tools (notably Sweave and knitr) handle this well, and can combine hundreds of graphs in a single pdf or html document.  It&#39;s easy to provide context by including prose in between the graphs.  This is huge improvement over managing dozens of loose png files, even if only one or two project members need to see them.</li>
 <li><em>Cohesion over time</em>: Something is wrong if you produce your graphs only once.  Things will inevitably need to be revised, either because you&#39;re monitoring the patterns while data are being collected, or you choose to subset the sample or transform some variable after the initial exploration.  Many have found source code repositories to be an ideal for change management.  It also allows multiple members of you research team to contribute in parallel, without the clumsiness of emailing file versions or ad-hoc versioning on a shared file server.  Many free version-control services are available, and GitHub is currently the most popular (cite two C&amp;H RR books)</li>
-<li><em>Tied to a data manipulation program</em>:  Many times an productive graphical exploration depends on the data manipulation more than the visualization code.</li>
+<li><em>Tied to a data manipulation program</em>:  Many times a productive graphical exploration depends on the data manipulation more than the visualization code.</li>
 </ol>
+
+<h3>Audience</h3>
+
+<p>A handful of members on your internal research team viewing hundreds of quickly-made graphs.  </p>
 
 <h1>Presentation</h1>
 
+<h3>Audience</h3>
+
+<p>Hopefully hundreds of people viewing only a handful of graphs.  These graphs need to be well-crafting and well-chosen, so that the essential concepts and patterns are communicated quickly to readers who may initially only be interested in skimming your publication for relevance or innovation.</p>
+
+<h3>Color (pasted from some internal notes/instructions Will wrote)</h3>
+
+<p>Learning a little about color will help you create better graphs. My two favorite approaches are <a href="http://tristen.ca/hcl-picker">HCL</a> and <a href="http://colorbrewer2.org/">ColorBrewer</a>.  Fortunately ggplot2 supports both of them easily.  If you&#39;re familar with the ideas behind them, you can develop graphs quicker too, instead of relying on trial-and-error to get it correct.  Both approaches were developed independent of R, but have packages and lots of documentation about them. {added Feb 2012}</p>
+
+<ul>
+<li><a href="http://tristen.ca/hcl-picker">HCL</a> represents color with the three components/dimensions of hue, chroma lightness.  It is implemented in the <a href="http://cran.r-project.org/web/packages/colorspace/">colorspace</a> package. It has a good <a href="http://cran.r-project.org/web/packages/colorspace/vignettes/hcl-colors.pdf">vignette</a> and <a href="http://www.sciencedirect.com/science/article/pii/S0167947308005549">article</a>.  A theoretical <a href="http://mmir.doc.ic.ac.uk/mmir2005/CameraReadyMissaoui.pdf">article</a> on HCL is by Sarifuddin and Missaoui. {added Feb 2012}</li>
+<li><a href="http://colorbrewer2.org/">ColorBrewer</a> has a good site that has explanations/references and lets you pick specific palettes.  It has a finite set of schemes, and doesn&#39;t have the mathematical foundation that HCL has.  But the color schemes have been refined by perceptual experiments.  It is implemented in the <a href="http://cran.r-project.org/web/packages/RColorBrewer/">RColorBrewer</a> package. I typically use it instead of HCL for categorical variables when it doesn&#39;t matter if some categories have slightly more intense colors than other categories.  I like the webpage best, because it (1) quickly gives you an example map, (2) allows you to specify how many colors in the palette, and (3) gives the RGB values for each color.  Within R, a quick version of this can be seen by executing <code>RColorBrewer::display.brewer.all()</code>. {added Feb 2012}</li>
+<li><a href="http://vis4.net/blog/posts/avoid-equidistant-hsv-colors/">vis4.net</a> has a good quick blog post on  that adds some more context. {added Feb 2012}</li>
+</ul>
+
 <h1>Interactivity</h1>
+
+<p>Isn&#39;t just for the exploratory phase any more.  Graphing libraries that run natively in a user&#39;s browser (without any special plug in) have allowed widespread deployments to normal users (eg, NYTimes).  Currently most of these require experience in a programming language like JavaScript, which many readers of this encyclopedia don&#39;t have.  However the need and gap have been identified by many commercial and academic groups, who are trying to allow interactive graphs to be developed by researchers without programming experience.</p>
 
 <h1>Resolution</h1>
 
+<p>As datasets become &ldquo;big&rdquo;, many of the common graphical techniques no longer effectively reveal patterns.  What is appropriate for a sample of 40 lab participants will likely fail for 400,000 county residents. If the volume of data is slightly overwhelming, techniques like jittering and translucency can alleviate things.  Beyond that, it probably requires you to think about what is being plotted.  Instead of plotting the (x,y) for each observation, a different approach is required, where the plotting area is partitioned and a summary of each partition is plotted.  A contour plot is the simplest example, where the count of a partition is represented.  This can be generalized to other attributes besides count (Wickham, ~2013).</p>
+
 <h1>References</h1>
+
+<ul>
+<li>Cleveland</li>
+<li>Gandrud (2013)</li>
+<li>Tufte</li>
+<li>Wickham (2009)</li>
+<li>Wilkinson (2005)</li>
+<li>Xie (2013)</li>
+</ul>
+
+<h1>Miscellaneous Snippets</h1>
+
+<ul>
+<li>Maps are good.  Because readers are familiar with mapping conventions and the geography, much richer multivariate patterns can be absorbed than &ldquo;statistical graphs&rdquo;.  It&#39;s a lot simpler and possibly more representative to show that X neighborhoods have Y outcomes, than it is to present a SEM showing that neighborhoods with median income of X1, median Race of X2, and median age of X3 have an outcome of Y; even politicians and policy makers can get it.  (Joe&#39;s point:) Additionally, maps immediately grab people attention, because they want to see how familiar neighborhoods/states/counties compare against each other.</li>
+</ul>
 
 <h1>Will&#39;s GDA World View</h1>
 
@@ -181,7 +218,7 @@ hr {
 
 <p>The second world used a Tufte-inspired approach where the researcher tries to communicate novel and complex relationships with only a handful of crafted graphs.  Not everything should not be an elegant Tufte graph appropriate for a wide audience; it would take too much time away from other important activities, such as Cleveland activities.</p>
 
-<p>The 2012 election coverage (eg, <a href="http://elections.nytimes.com/2012/results/president/scenarios">http://elections.nytimes.com/2012/results/president/scenarios</a>) exposed me to a third world &ndash;where interactive graphics didn’t require sophisticated audiences.  Until then, I’d valued interactive graphics mostly from the Cleveland perspective.  I hadn’t appreciated how effectively they could communicate concepts and relationships.  This is probably my primary pre-identified goal for this workshop.  I’d like to learn how your experts see the fit between these types of media and the types of audiences.  A secondary goal is to learn more about ideal interactive visualizations (if you had a week to develop one very public display), and learn more about less important interactive visualizations (if you had 8 hours to develop multiple displays).</p>
+<p>The 2012 election coverage (eg, <a href="http://elections.nytimes.com/2012/results/president/scenarios">http://elections.nytimes.com/2012/results/president/scenarios</a>) exposed me to a third world &ndash;where interactive graphics didn’t require sophisticated audiences.  Until then, I’d valued interactive graphics mostly from the Cleveland perspective.  I hadn’t appreciated how effectively they could communicate concepts and relationships.  I’d like to learn how your experts see the fit between these types of media and the types of audiences.  A secondary goal is to learn more about ideal interactive visualizations (if you had a week to develop one very public display), and learn more about less important interactive visualizations (if you had 8 hours to develop multiple displays).</p>
 
 </body>
 
