@@ -3,142 +3,133 @@ rm(list=ls(all=TRUE)) #Clear the memory for any variables set from any previous 
 
 ############################
 ## @knitr LoadPackages
-require(ggplot2, quietly=TRUE)
 require(plyr, quietly=TRUE)
-# require(reshape2, quietly=TRUE)
+require(scales, quietly=TRUE)
+require(RColorBrewer, quietly=TRUE)
+require(grid, quietly=TRUE)
+require(gridExtra, quietly=TRUE)
+require(ggplot2, quietly=TRUE)
 
 ############################
-## @knitr DeclareGlobalFunctions
-osdhCentralCountyID <- 99
-dateReportWindowStartForReferralInclusive <- as.Date("2007-01-01")
-dateReportWindowStopForReferralExclusive <- as.Date("2012-11-30") 
-reportingPeriodInYears <- (lubridate::as.period(dateReportWindowStopForReferralExclusive - dateReportWindowStartForReferralInclusive ))@year
+## @knitr DeclareGlobals
+pathInput <- "./Data/Derived/Longitudinal1.csv"
 
-pathCachedDataset <- "./PhiFreeDatasetsCache/C1/C1CountyMonth.rds"
-pathReportDirectory <-  file.path(getwd(), "OsdhReports/C1ActivityAapc")
-fileNameModel <- file.path(pathReportDirectory,"AapcTry.txt")
-# fileNameModel <- file.path(pathReportDirectory, "AapcTryMinimal.txt")
-pathBugsTempWorkingDirectory <- NULL #"./OsdhReports/C1ActivityAapc/BugsTemp" #Set this to a non NULL to peek inside
+badDefaultSize <- 20
+palette1Dark <- RColorBrewer::brewer.pal(n=6, name="Set1")[c(6,4)]
+palette1Light <- adjustcolor(palette1Dark, alpha.f=.2)
 
-chainCount <- 4
-iterationCount <- 1000 #The number used for estimate (ie, it doesn't include burn-in)
-burninCount <- iterationCount / 2 #This quantity affects the adapation length (and hense time duration) of `jags.model`.
+palette2Dark <- RColorBrewer::brewer.pal(n=3, name="Set1")[1:2]; names(palette2Dark) <- c("Tx", "Control")
+palette2Light <- adjustcolor(palette2Dark, alpha.f=.2); names(palette2Light) <- c("Tx", "Control")
+
+palette3Dark <- RColorBrewer::brewer.pal(n=4, name="Dark2")[c(1,2,4,3)]; names(palette3Dark) <- c("TxGreen", "TxBrown", "ControlGreen", "ControlBrown")
+palette3Light <- adjustcolor(palette3Dark, alpha.f=.4); names(palette3Light) <- c("TxGreen", "TxBrown", "ControlGreen", "ControlBrown")
+
+palette4Dark <- RColorBrewer::brewer.pal(n=4, name="Dark2"); names(palette4Dark) <- c("TxGreen", "TxBrown", "Control")
+palette4Light <- adjustcolor(palette4Dark, alpha.f=.4); names(palette4Light) <- c("TxGreen", "TxBrown", "Control")
+
+reportTheme <- theme_bw() +
+  theme(legend.text=element_text(color="gray40")) +
+  theme(axis.text = element_text(colour="gray40")) +
+  theme(axis.title = element_text(colour="gray40")) +
+  theme(panel.border = element_rect(colour="gray80")) +
+  theme(axis.ticks = element_line(colour="gray80")) +
+  theme(axis.ticks.length = grid::unit(0, "cm"))
+############################
+## @knitr LoadData
+ds1 <- read.csv(pathInput, stringsAsFactors=F)
+############################
+## @knitr TweakData
 
 ############################
-## @knitr LoadDS
-if( !file.exists(pathCachedDataset) ) stop(paste0("The file '", pathDirectoryCode, "' could not be found.  Check the path.  For this to work correctly, the 'MReporting.Rproj' needed to be opend in RStudio.  Otherwise the working directory would not be set correctly."))
-ds <- readRDS(pathCachedDataset)
-rm(pathCachedDataset)
+## @knitr OverplottedGrayscale
+ggplot(ds1, aes(x=TimePoint, y=Y, group=SubjectTag, shape=Group, linetype=Group)) +
+  geom_point() +
+  geom_line(size=2) +
+  theme_bw(base_size=badDefaultSize)
 
 ############################
-## @knitr TweakDS
-ds <- ds[ds$CountyID != osdhCentralCountyID, ]
-ds <- ds[dateReportWindowStartForReferralInclusive <= ds$Month & ds$Month < dateReportWindowStopForReferralExclusive, ]
-ds$MonthsElapsed <- round(difftime(ds$Month, min(ds$Month, na.rm=T), units="days")/(365.25/12))
-
-############################
-## @knitr PrepareMcmc
-ds$CountyIDF <- factor(ds$CountyID)
-ds$CountyIDShifted <- as.numeric(ds$CountyIDF)
-countyCount <- length(unique(ds$CountyIDShifted))
-countInCounty <- ds$EnrollCount
-proportionInCounty <- ds$EnrollPerNeed 
-
-if( sum(proportionInCounty>1, na.rm=T) ) stop("There is at least one county with a proportion above 1.0.")
-
-dataList <- list(
-  recordCount = nrow(ds)
-  , countInCounty = countInCounty
-#   , proportionInCounty = ds$EnrollPerNeed
-  , countyCount = countyCount
-  , countyIDShifted = ds$CountyIDShifted
-  , infantNeed = ds$InfantCount
-  , monthsElapsed = ds$MonthsElapsed  
-) # str(dataList)
-
-# head(cbind(ds$EnrollCount, ds$InfantCount), 20)
-
-inits <- function() { list(
-  mu_b0 = rnorm(n=1, sd=10 ) # mean=mean(dv, na.rm=T), sd=4*sd(dv, na.rm=T))
-#   mu_b0 = runif(n=1, min=min(countInCounty, na.rm=T), max=max(countInCounty, na.rm=T))
-#   , b1 = rnorm(1)
-#   , lambda = rnorm(countyCount)
-)}
-parametersToTrack <- c(
-  "mu_b0"
-  , "sigma_b0"
-  , "b0"
-  , "p0"
-  , "b1"
-)
-parametersToGraph <- c(
-  "mu_b0"
-  , "sigma_b0"
-#   , "b0"
-  , "b1"
+## @knitr Oversimplified
+grid.arrange(
+  ggplot(ds1, aes(x=TimePoint, y=Y)) +
+    geom_bar(stat="summary", fun.y="mean", na.rm=T, color=NA) +
+    theme_bw(base_size=badDefaultSize),
+  ggplot(ds1, aes(x=Group, y=Y)) +
+    geom_bar(stat="summary", fun.y="mean", na.rm=T, color=NA) +
+    theme_bw(base_size=badDefaultSize)#,
+    # layout=grid.layout(ncol=2, widths=grid::unit(c(2,1), units=c("null", "null")))
 )
 
-# curve(plogis(x), from=-5, to=5)
-# curve(qlogis(x), from=0, to=1)
-############################
-## @knitr RunBugs
-#CAUTION, THIS MODEL TAKES QUITE AWHILE TO CONVERGE; RUN THIS ONLY IF YOU WISH TO RECREATE/OVERWRITE PREVIOUSLY SAVED RESULTS
+ggplot(ds1, aes(x=TimePoint, y=Y, fill=Group)) +
+  geom_bar(stat="summary", fun.y="mean", position="dodge", na.rm=T, color=NA) +
+  scale_fill_manual(values=palette1Light) +
+  theme_bw(base_size=badDefaultSize)
 
-# startTime1 <- Sys.time()
-# resultsBugs <- bugs(
-#   data=dataList, inits=inits, parameters.to.save=parametersToTrack,
-#   n.chains=chainCount, n.iter=iterationCount, n.burnin=burninCount,
-#   model.file=fileNameModel, working.directory=pathBugsTempWorkingDirectory,
-#   debug=T)
-# 
-# (bugsElapsed <- Sys.time() - startTime1)
-# print(resultsBugs, digits=4)
-# 
-# # ARBCovlist[[1]] <- map.sim
-# save(list=c("resultsBugs"), file=file.path(pathReportDirectory, "resultsBugs.RData"))
+# ggplot(ds1, aes(x=TimePoint, y=Y, group=SubjectTag, color=GroupV2, fill=GroupV2)) +
+#   geom_boxplot(aes(group=c(TimePoint))) +
+#   scale_color_manual(values=palette1Dark) +
+#   scale_fill_manual(values=palette1Light) +
+#   reportTheme
 
-############################
-## @knitr RunJags
-#CAUTION, THIS MODEL TAKES QUITE AWHILE TO CONVERGE, RUN THIS ONLY IF YOU WISH TO RECREATE/OVERWRITE PREVIOUSLY SAVED RESULTS
-rjags::load.module("dic") # load a few useful modules (JAGS is modular in design): https://sites.google.com/site/autocatalysis/bayesian-methods-using-jags
+##################
+## @knitr BackToSubjects
+ggplot(ds1, aes(x=TimePoint, y=Y, group=SubjectTag, color=Group, fill=Group)) +
+  geom_line(data=ds1[ds1$Group=="Tx", ], size=2, color=palette1Dark[1]) +
+  geom_line(data=ds1[ds1$Group=="Control", ], size=2, color=palette1Dark[2]) +
+  #   scale_color_manual(values=c("ZControl"="blue", "Tx"="red")) +
+  theme_bw()
 
-startTime1 <- Sys.time()
-modelJags <- jags.model(file=fileNameModel, data=dataList, inits=inits, n.chains=chainCount, n.adapt=burninCount)
+ggplot(ds1, aes(x=TimePoint, y=Y, group=SubjectTag, color=Group, fill=Group)) +
+  geom_line(data=ds1[ds1$Group=="Tx", ], alpha=.3, color=palette1Dark[1]) +
+  geom_line(data=ds1[ds1$Group=="Control", ], alpha=.3, color=palette1Dark[2]) +
+  theme_bw()
 
-# (dicJags <- dic.samples(modelJags, n.iter=iterationCount) )
-chainsJags <- coda.samples(modelJags, variable.names=parametersToTrack, n.iter=iterationCount)
-(jagsElapsed <- Sys.time() - startTime1)
+ggplot(ds1, aes(x=TimePoint, y=Y, group=SubjectTag, color=Group, fill=Group)) +
+  geom_line(alpha=.3) +
+  scale_color_manual(values=palette2Dark) +
+  theme_bw()
 
-ggResults <- ggmcmc::ggs(chainsJags)
-# save(list=c("modelJags", "dicJags", "chainsJags", "ggResults"), file=file.path(pathReportDirectory, "resultsJags.RData"))
-save(list=c("modelJags", "chainsJags", "ggResults"), file=file.path(pathReportDirectory, "resultsJags.RData"))
-(condensed <- summary(chainsJags))
+##################
+## @knitr TwoGroupInteraction
+ggplot(ds1, aes(x=TimePoint, y=Y, group=SubjectTag, color=GroupV2, fill=GroupV2)) +
+  geom_line(alpha=.4) +
+  scale_color_manual(values=palette3Dark) +
+  scale_fill_manual(values=palette3Light) +
+  theme_bw()
 
-cat("R-Hat:\n")
-gelman.diag(chainsJags, autoburnin=FALSE) #This is R-hat; the burnin period is manually specified above, so turn off the auto argument. 
+##################
+## @knitr OverlayModel
+ggplot(ds1, aes(x=TimePoint, y=Y, group=SubjectTag, color=GroupV2, fill=GroupV2)) +
+  geom_line(alpha=.4) +
+  geom_smooth(aes(group=GroupV2), method="lm", size=3, size=3, linetype="D3") +
+  scale_color_manual(values=palette3Dark) +
+  scale_fill_manual(values=palette3Light) +
+  theme_bw()
 
-cat("Effective Size:\n")
-effectiveSize(chainsJags)
+ggplot(ds1, aes(x=TimePoint, y=Y, group=SubjectTag, color=GroupV2, fill=GroupV2)) +
+  geom_line(alpha=.4) +
+  geom_smooth(aes(group=GroupV2), method="loess", size=3, linetype="D3") +
+  scale_color_manual(values=palette3Dark) +
+  scale_fill_manual(values=palette3Light) +
+  theme_bw()
 
-############################
-## @knitr GraphJagsSelect
-ggs_density(ggResults, family=paste(parametersToGraph, collapse="|")) + theme(legend.position=c(1, 1), legend.justification=c(1,1)) 
-ggs_traceplot(ggResults, family=paste(parametersToGraph, collapse="|")) + theme(legend.position=c(0, 0), legend.justification=c(0,0)) 
-ggs_running(ggResults, family=paste(parametersToGraph, collapse="|")) 
-ggs_compare_partial(ggResults, family=paste(parametersToGraph, collapse="|"))
-ggs_crosscorrelation(ggResults, family=paste(parametersToGraph, collapse="|"))
+ggplot(ds1, aes(x=TimePoint, y=Y, group=SubjectTag, color=GroupV3, fill=GroupV3)) +
+  geom_line(alpha=.4) +
+  geom_smooth(aes(group=GroupV3), method="loess", size=3, linetype="D3") +
+  scale_color_manual(values=palette4Dark) +
+  scale_fill_manual(values=palette4Light) +
+  theme_bw() +
+  theme(legend.position=c(.5, 1), legend.justification=c(.5, 1))
 
-############################
-## @knitr GraphJagsAll
-ggs_Rhat(ggResults) 
-ggs_geweke(ggResults)
-ggs_caterpillar(ggResults)
-ggs_crosscorrelation(ggResults) #Graph all the parameters first
+#TODO: arrange the legend to correspond roughly with the graph's order (ie, green, purple, & brown).
+#TODO: spell out 'TxGreen' and 'TxBrown' in the legend.
+ggplot(ds1, aes(x=TimePoint, y=Y, group=SubjectTag, color=GroupV3, fill=GroupV3)) +
+  geom_line(alpha=.4) +
+  geom_smooth(aes(group=GroupV3), method="loess", size=0, linetype="D3", alpha=.7) +
+  scale_color_manual(values=palette4Dark) +
+  scale_fill_manual(values=palette4Light) +
+  reportTheme +
+  theme(legend.position=c(.5, 1), legend.justification=c(.5, 1)) +
+  labs(x="Time", y="Response", color=NULL, fill=NULL)
 
-# ggs_rocplot(ggResults, outcome = dv)
-# Another feature of caterpillar plots is the possibility to plot two different models, and be able to easily compare between them. A list of two ggs() objects must be provided.
-# ggs_caterpillar(list(A = ggs(s), B = ggs(s, par_labels = P)))
 
-############################
-## @knitr DisplayModels
-cat(readLines(fileNameModel), sep="\n")
+
