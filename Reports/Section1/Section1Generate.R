@@ -14,11 +14,12 @@ subjectsPerGroupV2Count <- 50
 timePoints <- 1:5
 groups <- c("ControlGreen", "ControlBrown", "TxGreen", "TxBrown")
 
-intercept <- 10
+intercept <- 8
 timeOffsets <- c(0, 1, 2, 3, 4)
 timeTxGreenOffsets <- c(0, 1, 2.4, 3, 4)
 timeTxBrownOffsets <- c(1, -1, -4, -1, 7)
-timeVariances <- c(3, 2, 1, 1.3, 1)
+timeControlBrownOffsets <- c(0, 0, 0, -.5, -1)
+timeVariances <- c(2, 1.5, 1, 1.3, 1)
 
 ############################
 ## @knitr LoadData
@@ -37,8 +38,15 @@ ds$Group <- plyr::revalue(ds$GroupV2, replace=c("ControlGreen"="Control", "Contr
 ds$GroupV3 <- plyr::revalue(ds$GroupV2, replace=c("ControlGreen"="Control", "ControlBrown"="Control"))
 ds$TxGreen <- (ds$GroupV2 == "TxGreen")
 ds$TxBrown <- (ds$GroupV2 == "TxBrown")
-ds$YHat <- intercept + timeOffsets[ds$TimePoint] + (timeTxGreenOffsets[ds$TimePoint]*ds$TxGreen) + (timeTxBrownOffsets[ds$TimePoint]*ds$TxBrown)
+ds$ControlBrownOffsets <- (ds$GroupV2 == "ControlBrown")
+ds$YHat <- intercept + 
+  timeOffsets[ds$TimePoint] + 
+  (timeTxGreenOffsets[ds$TimePoint]*ds$TxGreen) + 
+  (timeTxBrownOffsets[ds$TimePoint]*ds$TxBrown) +
+  (timeControlBrownOffsets[ds$TimePoint]*ds$ControlBrownOffsets)
+
 ds$Y <- rnorm(n=nrow(ds), mean=ds$YHat, sd=timeVariances[ds$TimePoint])
+ds$Year <- 2010 + ds$TimePoint
 
 write.csv(ds, file=pathOutput, row.names=F)
 

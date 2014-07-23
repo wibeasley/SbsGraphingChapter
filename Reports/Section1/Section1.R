@@ -8,6 +8,7 @@ require(scales, quietly=TRUE)
 require(RColorBrewer, quietly=TRUE)
 require(grid, quietly=TRUE)
 require(gridExtra, quietly=TRUE)
+require(mgcv, quietly=TRUE)
 require(ggplot2, quietly=TRUE)
 
 ############################
@@ -15,10 +16,11 @@ require(ggplot2, quietly=TRUE)
 pathInput <- "./Data/Derived/Longitudinal1.csv"
 
 badDefaultSize <- 20
-palette1Dark <- RColorBrewer::brewer.pal(n=6, name="Set1")[c(6,4)]
-palette1Light <- adjustcolor(palette1Dark, alpha.f=.2)
+#palette1Dark <- RColorBrewer::brewer.pal(n=6, name="Set1")[c(6,4)]; names(palette1Dark) <- c("Tx", "Control")
+palette1Dark <- c("#F6B443", "#AF0000"); names(palette1Dark) <- c("Tx", "Control")
+palette1Light <- adjustcolor(palette1Dark, alpha.f=.2); names(palette1Light) <- c("Tx", "Control")
 
-palette2Dark <- RColorBrewer::brewer.pal(n=3, name="Set1")[1:2]; names(palette2Dark) <- c("Tx", "Control")
+palette2Dark <- RColorBrewer::brewer.pal(n=3, name="Set1")[2:1]; names(palette2Dark) <- c("Tx", "Control")
 palette2Light <- adjustcolor(palette2Dark, alpha.f=.2); names(palette2Light) <- c("Tx", "Control")
 
 palette3Dark <- RColorBrewer::brewer.pal(n=4, name="Dark2")[c(1,2,4,3)]; names(palette3Dark) <- c("TxGreen", "TxBrown", "ControlGreen", "ControlBrown")
@@ -31,18 +33,17 @@ reportTheme <- theme_bw() +
   theme(legend.text=element_text(color="gray40")) +
   theme(axis.text = element_text(colour="gray40")) +
   theme(axis.title = element_text(colour="gray40")) +
-  theme(panel.border = element_rect(colour="gray80")) +
-  theme(axis.ticks = element_line(colour="gray80")) +
-  theme(axis.ticks.length = grid::unit(0, "cm"))
+  theme(axis.ticks.length = grid::unit(0, "cm")) +
+  theme(panel.border = element_rect(colour="gray80"))
 ############################
 ## @knitr LoadData
-ds1 <- read.csv(pathInput, stringsAsFactors=F)
+ds <- read.csv(pathInput, stringsAsFactors=F)
 ############################
 ## @knitr TweakData
-
+yRange <- c(0, max(ds$Y, na.rm=T) *1.04)
 ############################
 ## @knitr OverplottedGrayscale
-ggplot(ds1, aes(x=TimePoint, y=Y, group=SubjectTag, shape=Group, linetype=Group)) +
+ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, shape=Group, linetype=Group)) +
   geom_point() +
   geom_line(size=2) +
   theme_bw(base_size=badDefaultSize)
@@ -50,69 +51,82 @@ ggplot(ds1, aes(x=TimePoint, y=Y, group=SubjectTag, shape=Group, linetype=Group)
 ############################
 ## @knitr Oversimplified
 grid.arrange(
-  ggplot(ds1, aes(x=TimePoint, y=Y)) +
-    geom_bar(stat="summary", fun.y="mean", na.rm=T, color=NA) +
+  ggplot(ds, aes(x=Year, y=Y)) +
+    geom_bar(stat="summary", fun.y="mean", color=NA) +
     theme_bw(base_size=badDefaultSize),
-  ggplot(ds1, aes(x=Group, y=Y)) +
-    geom_bar(stat="summary", fun.y="mean", na.rm=T, color=NA) +
-    theme_bw(base_size=badDefaultSize)#,
+  ggplot(ds, aes(x=Group, y=Y, fill=Group)) +
+    geom_bar(stat="summary", fun.y="mean", color=NA) +
+    scale_fill_manual(values=palette1Dark) +
+    theme_bw(base_size=badDefaultSize) +
+    theme(legend.position="none")
     # layout=grid.layout(ncol=2, widths=grid::unit(c(2,1), units=c("null", "null")))
 )
 
-ggplot(ds1, aes(x=TimePoint, y=Y, fill=Group)) +
-  geom_bar(stat="summary", fun.y="mean", position="dodge", na.rm=T, color=NA) +
-  scale_fill_manual(values=palette1Light) +
+ggplot(ds, aes(x=Year, y=Y, fill=Group)) +
+  geom_bar(stat="summary", fun.y="mean", position="dodge", color=NA) +
+  scale_fill_manual(values=palette1Dark) +
   theme_bw(base_size=badDefaultSize)
 
-# ggplot(ds1, aes(x=TimePoint, y=Y, group=SubjectTag, color=GroupV2, fill=GroupV2)) +
-#   geom_boxplot(aes(group=c(TimePoint))) +
+# ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, color=GroupV2, fill=GroupV2)) +
+#   geom_boxplot(aes(group=c(Year))) +
 #   scale_color_manual(values=palette1Dark) +
 #   scale_fill_manual(values=palette1Light) +
 #   reportTheme
 
 ##################
 ## @knitr BackToSubjects
-ggplot(ds1, aes(x=TimePoint, y=Y, group=SubjectTag, color=Group, fill=Group)) +
-  geom_line(data=ds1[ds1$Group=="Tx", ], size=2, color=palette1Dark[1]) +
-  geom_line(data=ds1[ds1$Group=="Control", ], size=2, color=palette1Dark[2]) +
+ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, color=Group, fill=Group)) +
+  geom_line(data=ds[ds$Group=="Tx", ], size=2, color=palette1Dark[1]) +
+  geom_line(data=ds[ds$Group=="Control", ], size=2, color=palette1Dark[2]) +
   #   scale_color_manual(values=c("ZControl"="blue", "Tx"="red")) +
   theme_bw()
 
-ggplot(ds1, aes(x=TimePoint, y=Y, group=SubjectTag, color=Group, fill=Group)) +
-  geom_line(data=ds1[ds1$Group=="Tx", ], alpha=.3, color=palette1Dark[1]) +
-  geom_line(data=ds1[ds1$Group=="Control", ], alpha=.3, color=palette1Dark[2]) +
+ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, color=Group, fill=Group)) +
+  geom_line(data=ds[ds$Group=="Tx", ], alpha=.3, color=palette1Dark[1]) +
+  geom_line(data=ds[ds$Group=="Control", ], alpha=.3, color=palette1Dark[2]) +
   theme_bw()
 
-ggplot(ds1, aes(x=TimePoint, y=Y, group=SubjectTag, color=Group, fill=Group)) +
+ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, color=Group, fill=Group)) +
   geom_line(alpha=.3) +
   scale_color_manual(values=palette2Dark) +
-  theme_bw()
+  theme_bw() +
+  guides(colour=guide_legend(override.aes=list(size=3, alpha=1)))
 
 ##################
 ## @knitr TwoGroupInteraction
-ggplot(ds1, aes(x=TimePoint, y=Y, group=SubjectTag, color=GroupV2, fill=GroupV2)) +
+ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, color=GroupV2, fill=GroupV2)) +
   geom_line(alpha=.4) +
   scale_color_manual(values=palette3Dark) +
   scale_fill_manual(values=palette3Light) +
-  theme_bw()
+  theme_bw() +
+  guides(colour=guide_legend(override.aes=list(size=3, alpha=1)))
 
 ##################
 ## @knitr OverlayModel
-ggplot(ds1, aes(x=TimePoint, y=Y, group=SubjectTag, color=GroupV2, fill=GroupV2)) +
+ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, color=GroupV2, fill=GroupV2)) +
   geom_line(alpha=.4) +
   geom_smooth(aes(group=GroupV2), method="lm", size=3, size=3, linetype="D3") +
   scale_color_manual(values=palette3Dark) +
   scale_fill_manual(values=palette3Light) +
   theme_bw()
 
-ggplot(ds1, aes(x=TimePoint, y=Y, group=SubjectTag, color=GroupV2, fill=GroupV2)) +
+ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, color=GroupV2, fill=GroupV2)) +
   geom_line(alpha=.4) +
   geom_smooth(aes(group=GroupV2), method="loess", size=3, linetype="D3") +
   scale_color_manual(values=palette3Dark) +
   scale_fill_manual(values=palette3Light) +
   theme_bw()
 
-ggplot(ds1, aes(x=TimePoint, y=Y, group=SubjectTag, color=GroupV3, fill=GroupV3)) +
+# ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, color=GroupV2, fill=GroupV2)) +
+#   geom_line(alpha=.4) +
+#   geom_smooth(aes(group=GroupV2), method="gam", formula=y~s(x, k=4), size=3, linetype="D3") +
+#   scale_color_manual(values=palette3Dark) +
+#   scale_fill_manual(values=palette3Light) +
+#   theme_bw()
+
+##################
+## @knitr Tidy
+ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, color=GroupV3, fill=GroupV3)) +
   geom_line(alpha=.4) +
   geom_smooth(aes(group=GroupV3), method="loess", size=3, linetype="D3") +
   scale_color_manual(values=palette4Dark) +
@@ -122,14 +136,42 @@ ggplot(ds1, aes(x=TimePoint, y=Y, group=SubjectTag, color=GroupV3, fill=GroupV3)
 
 #TODO: arrange the legend to correspond roughly with the graph's order (ie, green, purple, & brown).
 #TODO: spell out 'TxGreen' and 'TxBrown' in the legend.
-ggplot(ds1, aes(x=TimePoint, y=Y, group=SubjectTag, color=GroupV3, fill=GroupV3)) +
-  geom_line(alpha=.4) +
-  geom_smooth(aes(group=GroupV3), method="loess", size=0, linetype="D3", alpha=.7) +
+ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, color=GroupV3, fill=GroupV3)) +
+  geom_line(alpha=.2) +
+  geom_smooth(aes(group=GroupV3), method="loess", size=0, linetype="D3", alpha=.5) +
   scale_color_manual(values=palette4Dark) +
   scale_fill_manual(values=palette4Light) +
+  coord_cartesian(ylim=yRange) +
   reportTheme +
   theme(legend.position=c(.5, 1), legend.justification=c(.5, 1)) +
-  labs(x="Time", y="Response", color=NULL, fill=NULL)
+  guides(colour=guide_legend(override.aes=list(size=3, alpha=.7))) +
+  labs(x=NULL, y="Response", color=NULL, fill=NULL)
 
 
+##################
+## @knitr TweakBar
+ggplot(ds, aes(x=Year, y=Y, color=GroupV3, fill=GroupV3)) +
+  geom_bar(stat="summary", fun.y="mean", position="dodge") +
+  scale_color_manual(values=palette4Dark) +
+  scale_fill_manual(values=palette4Light) +
+  coord_cartesian(ylim=c(0, 22)) +
+  reportTheme +
+  theme(legend.position=c(.5, 1), legend.justification=c(.5, 1)) +
+  labs(x=NULL, y="Response", color=NULL, fill=NULL)
 
+# dsSummarized <- plyr::ddply(ds, .variables=c("Year", "GroupV3"), summarize,
+#                             Mean = mean(Y, na.rm=T),
+#                             SE = sd(Y, na.rm=T) / sqrt(sum(!is.na(Y))),
+#                             Lower = Mean - SE,
+#                             Upper = Mean + SE
+# )
+# 
+# ggplot(dsSummarized, aes(x=Year, y=Mean, ymin=Lower, ymax=Upper, color=GroupV3, fill=GroupV3)) +
+#   geom_bar(stat="summary", fun.y="mean", position="dodge") +
+#   geom_errorbar(position="dodge") +
+#   scale_color_manual(values=palette4Dark) +
+#   scale_fill_manual(values=palette4Light) +
+#   coord_cartesian(ylim=c(0, 22)) +
+#   reportTheme +
+#   theme(legend.position=c(.5, 1), legend.justification=c(.5, 1)) +
+#   labs(x="Time", y="Response", color=NULL, fill=NULL)
