@@ -29,7 +29,6 @@ timeVariances <- c(2, 1.5, 1, 1.3, 1)
 
 ############################
 ## @knitr Generate
-set.seed(63) #To keep numbers & graphs consistent across generations
 ds <- base::expand.grid(GroupV2=groups, TimePoint=timePoints, SubjectIndex=seq_len(subjectsPerGroupV2Count), stringsAsFactors=TRUE)
 ds$SubjectTag <- sprintf("%s-%03d", ds$GroupV2, ds$SubjectIndex) #This is a unique identifier
 
@@ -45,7 +44,10 @@ ds$YHat <- intercept +
   (timeTxBrownOffsets[ds$TimePoint]*ds$TxBrown) +
   (timeControlBrownOffsets[ds$TimePoint]*ds$ControlBrownOffsets)
 
+set.seed(63) #To keep numbers & graphs consistent across generations
 ds$Y <- rnorm(n=nrow(ds), mean=ds$YHat, sd=timeVariances[ds$TimePoint])
+set.seed(63) #To keep numbers & graphs consistent across generations
+ds$Y2 <- rnorm(n=nrow(ds), mean=ds$YHat, sd=2*timeVariances[ds$TimePoint])
 ds$Year <- 2010 + ds$TimePoint
 
 write.csv(ds, file=pathOutput, row.names=F)

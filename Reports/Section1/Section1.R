@@ -8,7 +8,7 @@ require(scales, quietly=TRUE)
 require(RColorBrewer, quietly=TRUE)
 require(grid, quietly=TRUE)
 require(gridExtra, quietly=TRUE)
-require(mgcv, quietly=TRUE)
+# require(mgcv, quietly=TRUE)
 require(ggplot2, quietly=TRUE)
 
 ############################
@@ -40,13 +40,16 @@ reportTheme <- theme_bw() +
 ds <- read.csv(pathInput, stringsAsFactors=F)
 ############################
 ## @knitr TweakData
-yRange <- c(0, max(ds$Y, na.rm=T) *1.04)
+yRange <- c(.5, max(ds$Y, na.rm=T) *1.04)
+
 ############################
 ## @knitr OverplottedGrayscale
 ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, shape=Group, linetype=Group)) +
-  geom_point() +
+#   geom_point() +
   geom_line(size=2) +
-  theme_bw(base_size=badDefaultSize)
+  scale_linetype_manual(values=c("F1","11")) +
+  theme_bw(base_size=badDefaultSize) +
+  guides(linetype=guide_legend(keywidth=2))
 
 ############################
 ## @knitr Oversimplified
@@ -132,7 +135,7 @@ ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, color=GroupV3, fill=GroupV3)) +
   scale_color_manual(values=palette4Dark) +
   scale_fill_manual(values=palette4Light) +
   theme_bw() +
-  theme(legend.position=c(.5, 1), legend.justification=c(.5, 1))
+  theme(legend.position=c(0, 1), legend.justification=c(0, 1))
 
 #TODO: arrange the legend to correspond roughly with the graph's order (ie, green, purple, & brown).
 #TODO: spell out 'TxGreen' and 'TxBrown' in the legend.
@@ -141,12 +144,11 @@ ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, color=GroupV3, fill=GroupV3)) +
   geom_smooth(aes(group=GroupV3), method="loess", size=0, linetype="D3", alpha=.5) +
   scale_color_manual(values=palette4Dark) +
   scale_fill_manual(values=palette4Light) +
-  coord_cartesian(ylim=yRange) +
+  coord_cartesian(xlim=c(2011, 2015), ylim=yRange) +
   reportTheme +
-  theme(legend.position=c(.5, 1), legend.justification=c(.5, 1)) +
+  theme(legend.position=c(0, 1), legend.justification=c(0, 1)) +
   guides(colour=guide_legend(override.aes=list(size=3, alpha=.7))) +
   labs(x=NULL, y="Response", color=NULL, fill=NULL)
-
 
 ##################
 ## @knitr TweakBar
@@ -156,7 +158,61 @@ ggplot(ds, aes(x=Year, y=Y, color=GroupV3, fill=GroupV3)) +
   scale_fill_manual(values=palette4Light) +
   coord_cartesian(ylim=c(0, 22)) +
   reportTheme +
-  theme(legend.position=c(.5, 1), legend.justification=c(.5, 1)) +
+  theme(legend.position=c(0, 1), legend.justification=c(0, 1)) +
+  labs(x=NULL, y="Response", color=NULL, fill=NULL)
+
+##################
+## @knitr ThinnedGrayscale
+ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, linetype=GroupV3)) +
+  geom_line(alpha=.2, color="gray40") +
+  geom_smooth(aes(group=GroupV3), method="loess", color="gray10", alpha=.5) +
+  scale_linetype_manual(values=c("FF", "55", "22")) +
+  coord_cartesian(xlim=c(2011, 2015), ylim=yRange) +
+  reportTheme +
+  theme(legend.position=c(0, 1), legend.justification=c(0, 1)) +
+  guides(linetype=guide_legend(override.aes=list(alpha=.7), keywidth=5)) +
+  labs(x=NULL, y="Response", linetype=NULL)
+
+ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, linetype=GroupV3)) +
+  geom_smooth(aes(group=GroupV3), method="loess", color="gray10", alpha=.5) +
+  scale_linetype_manual(values=c("FF", "55", "22")) +
+  coord_cartesian(xlim=c(2011, 2015), ylim=yRange) +
+  reportTheme +
+  theme(legend.position=c(0, 1), legend.justification=c(0, 1)) +
+  guides(linetype=guide_legend(override.aes=list(alpha=.7), keywidth=5)) +
+  labs(x=NULL, y="Response", linetype=NULL)
+
+ggplot(ds, aes(x=Year, y=Y2, group=SubjectTag, linetype=GroupV3)) +
+  geom_smooth(aes(group=GroupV3), method="loess", color="gray10", alpha=.5) +
+  annotate("text", x=Inf, y=-Inf, label="(Alternate Data)", vjust=-.5, hjust=1.1, color="gray40") +
+  scale_linetype_manual(values=c("FF", "55", "22")) +
+  coord_cartesian(xlim=c(2011, 2015), ylim=yRange) +  
+  reportTheme +
+  theme(legend.position=c(0, 1), legend.justification=c(0, 1)) +
+  guides(linetype=guide_legend(override.aes=list(alpha=.7), keywidth=5)) +
+  labs(x=NULL, y="Response", linetype=NULL)
+
+ggplot(ds, aes(x=Year, y=Y2, group=SubjectTag, linetype=GroupV3)) +
+  geom_line(alpha=.2, color="gray40") +
+  geom_smooth(aes(group=GroupV3), method="loess", color="gray10", alpha=.5) +
+  annotate("text", x=Inf, y=-Inf, label="(Alternate Data)", vjust=-.5, hjust=1.1, color="gray40") +
+  scale_linetype_manual(values=c("FF", "55", "22")) +
+  coord_cartesian(xlim=c(2011, 2015), ylim=yRange) +  
+  reportTheme +
+  theme(legend.position=c(0, 1), legend.justification=c(0, 1)) +
+  guides(linetype=guide_legend(override.aes=list(alpha=.7), keywidth=5)) +
+  labs(x=NULL, y="Response", linetype=NULL)
+
+ggplot(ds, aes(x=Year, y=Y2, group=SubjectTag, color=GroupV3, fill=GroupV3)) +
+  geom_line(alpha=.2) +
+  geom_smooth(aes(group=GroupV3), method="loess", size=0, linetype="D3", alpha=.5) +
+  annotate("text", x=Inf, y=-Inf, label="(Alternate Data)", vjust=-.5, hjust=1.1, color="gray40") +
+  scale_color_manual(values=palette4Dark) +
+  scale_fill_manual(values=palette4Light) +
+  coord_cartesian(xlim=c(2011, 2015), ylim=yRange) +
+  reportTheme +
+  theme(legend.position=c(0, 1), legend.justification=c(0, 1)) +
+  guides(colour=guide_legend(override.aes=list(size=3, alpha=.7))) +
   labs(x=NULL, y="Response", color=NULL, fill=NULL)
 
 # dsSummarized <- plyr::ddply(ds, .variables=c("Year", "GroupV3"), summarize,
