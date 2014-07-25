@@ -10,12 +10,14 @@ require(grid, quietly=TRUE)
 require(gridExtra, quietly=TRUE)
 # require(mgcv, quietly=TRUE)
 require(ggplot2, quietly=TRUE)
+require(lme4, quietly=TRUE)
 
 ############################
 ## @knitr DeclareGlobals
 pathInput <- "./Data/Derived/Longitudinal1.csv"
 
 badDefaultSize <- 20
+annotateCornerX <- 2014.9
 #palette1Dark <- RColorBrewer::brewer.pal(n=6, name="Set1")[c(6,4)]; names(palette1Dark) <- c("Tx", "Control")
 palette1Dark <- c("#F6B443", "#AF0000"); names(palette1Dark) <- c("Tx", "Control")
 palette1Light <- adjustcolor(palette1Dark, alpha.f=.2); names(palette1Light) <- c("Tx", "Control")
@@ -35,12 +37,17 @@ reportTheme <- theme_bw() +
   theme(axis.title = element_text(colour="gray40")) +
   theme(axis.ticks.length = grid::unit(0, "cm")) +
   theme(panel.border = element_rect(colour="gray80"))
+
 ############################
 ## @knitr LoadData
 ds <- read.csv(pathInput, stringsAsFactors=F)
+
 ############################
 ## @knitr TweakData
-yRange <- c(.5, max(ds$Y, na.rm=T) *1.04)
+yRange <- c(.5, max(ds$Y, na.rm=T)*1.04) #This forces a common y range when we add and remove elements later in the section.
+ds$TimePointSq <- ds$TimePoint^2
+ds$TimePointF <- factor(ds$TimePoint, ordered=F)
+ds$SubjectTag <- factor(ds$SubjectTag)
 
 ############################
 ## @knitr OverplottedGrayscale
@@ -85,12 +92,12 @@ ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, color=Group, fill=Group)) +
   theme_bw()
 
 ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, color=Group, fill=Group)) +
-  geom_line(data=ds[ds$Group=="Tx", ], alpha=.3, color=palette1Dark[1]) +
-  geom_line(data=ds[ds$Group=="Control", ], alpha=.3, color=palette1Dark[2]) +
+  geom_line(data=ds[ds$Group=="Tx", ], alpha=.2, color=palette1Dark[1]) +
+  geom_line(data=ds[ds$Group=="Control", ], alpha=.2, color=palette1Dark[2]) +
   theme_bw()
 
 ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, color=Group, fill=Group)) +
-  geom_line(alpha=.3) +
+  geom_line(alpha=.2) +
   scale_color_manual(values=palette2Dark) +
   theme_bw() +
   guides(colour=guide_legend(override.aes=list(size=3, alpha=1)))
@@ -98,7 +105,7 @@ ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, color=Group, fill=Group)) +
 ##################
 ## @knitr TwoGroupInteraction
 ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, color=GroupV2, fill=GroupV2)) +
-  geom_line(alpha=.4) +
+  geom_line(alpha=.2) +
   scale_color_manual(values=palette3Dark) +
   scale_fill_manual(values=palette3Light) +
   theme_bw() +
@@ -107,15 +114,15 @@ ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, color=GroupV2, fill=GroupV2)) +
 ##################
 ## @knitr OverlayModel
 ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, color=GroupV2, fill=GroupV2)) +
-  geom_line(alpha=.4) +
-  geom_smooth(aes(group=GroupV2), method="lm", size=3, size=3, linetype="D3") +
+  geom_line(alpha=.2) +
+  geom_smooth(aes(group=GroupV2), method="lm", size=2, linetype="D3") +
   scale_color_manual(values=palette3Dark) +
   scale_fill_manual(values=palette3Light) +
   theme_bw()
 
 ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, color=GroupV2, fill=GroupV2)) +
-  geom_line(alpha=.4) +
-  geom_smooth(aes(group=GroupV2), method="loess", size=3, linetype="D3") +
+  geom_line(alpha=.2) +
+  geom_smooth(aes(group=GroupV2), method="loess", size=2, linetype="D3") +
   scale_color_manual(values=palette3Dark) +
   scale_fill_manual(values=palette3Light) +
   theme_bw()
@@ -130,8 +137,8 @@ ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, color=GroupV2, fill=GroupV2)) +
 ##################
 ## @knitr Tidy
 ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, color=GroupV3, fill=GroupV3)) +
-  geom_line(alpha=.4) +
-  geom_smooth(aes(group=GroupV3), method="loess", size=3, linetype="D3") +
+  geom_line(alpha=.3) +
+  geom_smooth(aes(group=GroupV3), method="loess", size=2, linetype="D3") +
   scale_color_manual(values=palette4Dark) +
   scale_fill_manual(values=palette4Light) +
   theme_bw() +
@@ -141,7 +148,8 @@ ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, color=GroupV3, fill=GroupV3)) +
 #TODO: spell out 'TxGreen' and 'TxBrown' in the legend.
 ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, color=GroupV3, fill=GroupV3)) +
   geom_line(alpha=.2) +
-  geom_smooth(aes(group=GroupV3), method="loess", size=0, linetype="D3", alpha=.5) +
+  geom_smooth(aes(group=GroupV3), method="loess", size=0, alpha=.5) +
+  annotate("text", x=annotateCornerX, y=-Inf, label="(Our preferred color version)", vjust=-.5, hjust=1, color="gray40") +
   scale_color_manual(values=palette4Dark) +
   scale_fill_manual(values=palette4Light) +
   coord_cartesian(xlim=c(2011, 2015), ylim=yRange) +
@@ -161,60 +169,6 @@ ggplot(ds, aes(x=Year, y=Y, color=GroupV3, fill=GroupV3)) +
   theme(legend.position=c(0, 1), legend.justification=c(0, 1)) +
   labs(x=NULL, y="Response", color=NULL, fill=NULL)
 
-##################
-## @knitr ThinnedGrayscale
-ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, linetype=GroupV3)) +
-  geom_line(alpha=.2, color="gray40") +
-  geom_smooth(aes(group=GroupV3), method="loess", color="gray10", alpha=.5) +
-  scale_linetype_manual(values=c("FF", "55", "22")) +
-  coord_cartesian(xlim=c(2011, 2015), ylim=yRange) +
-  reportTheme +
-  theme(legend.position=c(0, 1), legend.justification=c(0, 1)) +
-  guides(linetype=guide_legend(override.aes=list(alpha=.7), keywidth=5)) +
-  labs(x=NULL, y="Response", linetype=NULL)
-
-ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, linetype=GroupV3)) +
-  geom_smooth(aes(group=GroupV3), method="loess", color="gray10", alpha=.5) +
-  scale_linetype_manual(values=c("FF", "55", "22")) +
-  coord_cartesian(xlim=c(2011, 2015), ylim=yRange) +
-  reportTheme +
-  theme(legend.position=c(0, 1), legend.justification=c(0, 1)) +
-  guides(linetype=guide_legend(override.aes=list(alpha=.7), keywidth=5)) +
-  labs(x=NULL, y="Response", linetype=NULL)
-
-ggplot(ds, aes(x=Year, y=Y2, group=SubjectTag, linetype=GroupV3)) +
-  geom_smooth(aes(group=GroupV3), method="loess", color="gray10", alpha=.5) +
-  annotate("text", x=Inf, y=-Inf, label="(Alternate Data)", vjust=-.5, hjust=1.1, color="gray40") +
-  scale_linetype_manual(values=c("FF", "55", "22")) +
-  coord_cartesian(xlim=c(2011, 2015), ylim=yRange) +  
-  reportTheme +
-  theme(legend.position=c(0, 1), legend.justification=c(0, 1)) +
-  guides(linetype=guide_legend(override.aes=list(alpha=.7), keywidth=5)) +
-  labs(x=NULL, y="Response", linetype=NULL)
-
-ggplot(ds, aes(x=Year, y=Y2, group=SubjectTag, linetype=GroupV3)) +
-  geom_line(alpha=.2, color="gray40") +
-  geom_smooth(aes(group=GroupV3), method="loess", color="gray10", alpha=.5) +
-  annotate("text", x=Inf, y=-Inf, label="(Alternate Data)", vjust=-.5, hjust=1.1, color="gray40") +
-  scale_linetype_manual(values=c("FF", "55", "22")) +
-  coord_cartesian(xlim=c(2011, 2015), ylim=yRange) +  
-  reportTheme +
-  theme(legend.position=c(0, 1), legend.justification=c(0, 1)) +
-  guides(linetype=guide_legend(override.aes=list(alpha=.7), keywidth=5)) +
-  labs(x=NULL, y="Response", linetype=NULL)
-
-ggplot(ds, aes(x=Year, y=Y2, group=SubjectTag, color=GroupV3, fill=GroupV3)) +
-  geom_line(alpha=.2) +
-  geom_smooth(aes(group=GroupV3), method="loess", size=0, linetype="D3", alpha=.5) +
-  annotate("text", x=Inf, y=-Inf, label="(Alternate Data)", vjust=-.5, hjust=1.1, color="gray40") +
-  scale_color_manual(values=palette4Dark) +
-  scale_fill_manual(values=palette4Light) +
-  coord_cartesian(xlim=c(2011, 2015), ylim=yRange) +
-  reportTheme +
-  theme(legend.position=c(0, 1), legend.justification=c(0, 1)) +
-  guides(colour=guide_legend(override.aes=list(size=3, alpha=.7))) +
-  labs(x=NULL, y="Response", color=NULL, fill=NULL)
-
 # dsSummarized <- plyr::ddply(ds, .variables=c("Year", "GroupV3"), summarize,
 #                             Mean = mean(Y, na.rm=T),
 #                             SE = sd(Y, na.rm=T) / sqrt(sum(!is.na(Y))),
@@ -231,3 +185,93 @@ ggplot(ds, aes(x=Year, y=Y2, group=SubjectTag, color=GroupV3, fill=GroupV3)) +
 #   reportTheme +
 #   theme(legend.position=c(.5, 1), legend.justification=c(.5, 1)) +
 #   labs(x="Time", y="Response", color=NULL, fill=NULL)
+
+##################
+## @knitr ThinnedGrayscale
+ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, linetype=GroupV3)) +
+  geom_line(alpha=.2, color="gray40") +
+  geom_smooth(aes(group=GroupV3), method="loess", color="gray10", alpha=.5) +
+  annotate("text", x=annotateCornerX, y=-Inf, label="(Our preferred grayscale version)", vjust=-.5, hjust=1, color="gray40") +
+  scale_linetype_manual(values=c("FF", "55", "22")) +
+  coord_cartesian(xlim=c(2011, 2015), ylim=yRange) +
+  reportTheme +
+  theme(legend.position=c(0, 1), legend.justification=c(0, 1)) +
+  guides(linetype=guide_legend(override.aes=list(alpha=.7), keywidth=5)) +
+  labs(x=NULL, y="Response", linetype=NULL)
+
+ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, linetype=GroupV3)) +
+  geom_smooth(aes(group=GroupV3), method="loess", color="gray10", alpha=.5) +
+  scale_linetype_manual(values=c("FF", "55", "22")) +
+  coord_cartesian(xlim=c(2011, 2015), ylim=yRange) +
+  reportTheme +
+  theme(legend.position=c(0, 1), legend.justification=c(0, 1)) +
+  guides(linetype=guide_legend(override.aes=list(alpha=.7), keywidth=5)) +
+  labs(x=NULL, y="Response", linetype=NULL)
+
+ggplot(ds, aes(x=Year, y=YAlternate, group=SubjectTag, linetype=GroupV3)) +
+  geom_smooth(aes(group=GroupV3), method="loess", color="gray10", alpha=.5) +
+  annotate("text", x=annotateCornerX, y=-Inf, label="(Alternate Data)", vjust=-.5, hjust=1, color="gray40") +
+  scale_linetype_manual(values=c("FF", "55", "22")) +
+  coord_cartesian(xlim=c(2011, 2015), ylim=yRange) +  
+  reportTheme +
+  theme(legend.position=c(0, 1), legend.justification=c(0, 1)) +
+  guides(linetype=guide_legend(override.aes=list(alpha=.7), keywidth=5)) +
+  labs(x=NULL, y="Response", linetype=NULL)
+
+ggplot(ds, aes(x=Year, y=YAlternate, group=SubjectTag, linetype=GroupV3)) +
+  geom_line(alpha=.2, color="gray40") +
+  geom_smooth(aes(group=GroupV3), method="loess", color="gray10", alpha=.5) +
+  annotate("text", x=annotateCornerX, y=-Inf, label="(Alternate Data)", vjust=-.5, hjust=1, color="gray40") +
+  scale_linetype_manual(values=c("FF", "55", "22")) +
+  coord_cartesian(xlim=c(2011, 2015), ylim=yRange) +  
+  reportTheme +
+  theme(legend.position=c(0, 1), legend.justification=c(0, 1)) +
+  guides(linetype=guide_legend(override.aes=list(alpha=.7), keywidth=5)) +
+  labs(x=NULL, y="Response", linetype=NULL)
+
+ggplot(ds, aes(x=Year, y=YAlternate, group=SubjectTag, color=GroupV3, fill=GroupV3)) +
+  geom_line(alpha=.2) +
+  geom_smooth(aes(group=GroupV3), method="loess", size=0, linetype="D3", alpha=.5) +
+  annotate("text", x=annotateCornerX, y=-Inf, label="(Alternate Data)", vjust=-.5, hjust=1, color="gray40") +
+  scale_color_manual(values=palette4Dark) +
+  scale_fill_manual(values=palette4Light) +
+  coord_cartesian(xlim=c(2011, 2015), ylim=yRange) +
+  reportTheme +
+  theme(legend.position=c(0, 1), legend.justification=c(0, 1)) +
+  guides(colour=guide_legend(override.aes=list(size=3, alpha=.7))) +
+  labs(x=NULL, y="Response", color=NULL, fill=NULL)
+
+##################
+## @knitr Mlm
+# fitLinear <- lmer(Y ~ 1 + GroupV3*TimePoint + (1|SubjectTag), data=ds)
+# summary(fitLinear)
+
+fitQuadratic <- lmer(Y ~ 1 + GroupV3*TimePoint + GroupV3*TimePointSq + (1|SubjectTag), data=ds)
+# summary(fitQuadratic)
+
+fitCategorical <- lmer(Y ~ 1 + GroupV3*TimePointF + (1|SubjectTag), data=ds)
+# summary(fitCategorical)
+
+dsPredict <- base::expand.grid(GroupV3=unique(ds$GroupV3), TimePoint=unique(ds$TimePoint))
+dsPredict$TimePointSq <- dsPredict$TimePoint^2
+dsPredict$YHat <- lme4:::predict.merMod(fitQuadratic, newdata=dsPredict, re.form=NA)
+
+# p <- profile(fitCategorical)
+# p$.par
+# 
+# lme4:::xyplot.thpr(p)
+# lattice::xyplot(profile(fitQuadratic))
+
+# dsForitified <- fortify.merMod(fitQuadratic)
+# 
+# 
+# 
+# ggplot(ds, aes(x=Year, y=Y, group=SubjectTag, color=GroupV3, fill=GroupV3)) +
+#   geom_line(alpha=.2) +
+#   scale_color_manual(values=palette4Dark) +
+#   scale_fill_manual(values=palette4Light) +
+#   coord_cartesian(xlim=c(2011, 2015), ylim=yRange) +
+#   reportTheme +
+#   theme(legend.position=c(0, 1), legend.justification=c(0, 1)) +
+#   guides(colour=guide_legend(override.aes=list(size=3, alpha=.7))) +
+#   labs(x=NULL, y="Response", color=NULL, fill=NULL)

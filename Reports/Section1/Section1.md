@@ -2,7 +2,7 @@
 
 <!-- Specify the report's official name, goal & description. -->
 # Graphs for the First Section of the SBS Chapter
-**Report Description**: {{Put a description here, once we know more about it.}}
+**Report Description**: Describes how graphing details can lead to insights not possible by graphing only summaries.
 
 
 
@@ -28,19 +28,19 @@ A typical first place to start is graphing points by different shapes and line d
 
 ![plot of chunk OverplottedGrayscale](FigureRmd/OverplottedGrayscale.png) 
 
-At this point, we believe it's best to finese the visual elements so that the underlying trends may become noticeable.  However, too frequently the researcher immediately chooses to eliminate much of the complexity (and potential richness) of the dataset and instead presents only the means of the time and group, or (hopefully) both simultaneously.  {Maybe include one more graph with error bars.}
+At this point, we believe it's best to finesse the visual elements so that the underlying trends may become noticeable.  However, too frequently the researcher immediately chooses to eliminate much of the complexity (and potential richness) of the dataset and instead presents only the means of the time and group, or (hopefully) both simultaneously.  {Maybe include one more graph with error bars.}
 
 ![plot of chunk Oversimplified](FigureRmd/Oversimplified1.png) ![plot of chunk Oversimplified](FigureRmd/Oversimplified2.png) 
 
 We advocate that instead of immediately simplifying as in the previous bar graphs, the researcher stowe their dainty umbrella and get into their full-length wetsuit to explore for emerging trends.  Returning to the initial line graph, we'll temporarily ignore the grayscale constraints and consider more dimensions (such as color) to explore this multivariate dataset.
 
-Because the lines are thick and opaque, it's difficult to determine what the peach lines are doing underneath the red.  Consequently, we'll lighten the lines by narrowing them, and decreasing their opacity (which is specified by the color's "alpha" channel in most software).  Next, we'll choose a palette whose colors are balanced, so the faint peach is not overwhelmed by the dark red. (Footnote: This is not a fictitious straw-man; the peach and red color scheme was repeated used by a group of adult male statisticians between 2012 and 2014.  This palette also included lime green and bright pink, from which you are spared.)  The resulting graph reveals that the treatment subjects are not monolithic; at Time 3, some go high, while others dip low and subsequently recover.  
+Because the lines are thick and opaque, it's difficult to determine what the peach lines are doing underneath the red.  Consequently, we'll lighten the lines by narrowing them, and decreasing their opacity (which is specified by the color's "alpha" channel in most software).  Next, we'll choose a palette whose colors are balanced, so the faint peach is not overwhelmed by the dark red. (Footnote: This is not a fictitious straw-man; the peach and red color scheme was repeated used by adult males between 2012 and 2014.  This palette also included lime green and bright pink, from which you are spared.  These statisticians also dedicated an entire page to a bar graphs with two standard bars.  If only two data points need to be communicated, we recommend using much less space, and possibly including the numbers in the text or a very simple table.)  The resulting graph reveals that the treatment subjects are not monolithic; at Time 3, some go high, while others dip low and subsequently recover.  
 
 ![plot of chunk BackToSubjects](FigureRmd/BackToSubjects1.png) ![plot of chunk BackToSubjects](FigureRmd/BackToSubjects2.png) ![plot of chunk BackToSubjects](FigureRmd/BackToSubjects3.png) 
 
 After introspection and investigation, we sift through some collected variables and find a subject's eye color interacts with the treatment protocol, but not the control protocol.
 
-Notice this intra-group trend is impossible to detect with graphical methods that collapse subjects.  A "spaghetti plot" like this is an important tool for the social and behavioral sciences where inter-individual differences frequently posses considerable explanatory power.  Likewise, running most confirmatory models (like a repeated measures ANOVA or a multi-level model) is very unlikely to have suggested this dichotomy.  Our pattern was fairly detectable using an appropriate graph, but would have required experimenting with several covariates and polynomial terms.
+Notice this intra-group trend is impossible to detect with graphical methods that collapse across subjects.  This "spaghetti plot" is an important tool in social and behavioral research where inter-individual differences frequently posses considerable explanatory power.  Likewise, most confirmatory models (like a repeated measures ANOVA or a multilevel model) are very unlikely to have uncovered this dichotomy.  Our pattern was detectable using an appropriate graph; we didn't know what caused the blue lines above to split by 2012, but at least we were aware of the pattern and could start searching.  In contrast, confirmatory modeling would have had a worse chance detecting the split, and would have required experimenting with several covariates and polynomial terms.
 
 ![plot of chunk TwoGroupInteraction](FigureRmd/TwoGroupInteraction.png) 
 
@@ -60,13 +60,13 @@ The second reason demonstrates how GDA and CDA can complement each other.  This 
 
 ![plot of chunk TweakBar](FigureRmd/TweakBar.png) 
 
-If the figure needs to be reduced to grayscale, we're in a better position than before, since we're now aware of several patterns not discoverable through a bar graph.  We have a few remarks about our prefered reduction from color.  First, the groups have a constant shade, to prevent the darker groups from giving a false impression of an increased density.  Second, the dashed patterns' on/off space is balanced, in an attempt to prevent the groups with more ink from gathering more attention.  Third, if we had used shapes, we'd attempt to balance them (for example, avoiding assigning a big solid circle to on group's subjects, while assigning a thin x or plus to another group).
+If the figure needs to be reduced to grayscale, we're in a better position than before, since we're now aware of several patterns not discoverable through a bar graph.  We have a few remarks about our prefered reduction from color.  First, the groups have a constant shade, to prevent the darker groups from giving a false impression of an increased density.  Second, the dashed patterns' on/off space is balanced, in an attempt to prevent the groups with more ink from gathering more attention.  Third, if we had used shapes, we'd attempt to balance them (for example, avoiding assigning a big dark solid circle to some groups, while assigning a thin 'x' or '+' to others). Fourth, we'd continue to develop the color version alongside the grayscale, because we can usually distribute the color version on a website or in the journal's supplemental material.
 
 In this grayscale, the three group summaries are easily distinguished, but the individual subject lines are not, despite having different dashed patterns.  Although many of the subject-level patterns are muddled (e.g., it's difficult to determine that the three groups have almost no overlap in 2013), we still advocate retaining them.  The reader might benefit seeing how the variance shrinks from 2011 to 2012, and that the highest subjects in 2013 and 2014 were in TxGreen, while the highest subjects in 2015 were in TxBrown.
  
 However we argue that the most compelling reason is to permit the reader to judge how tightly or loosely the individual scores fall near the model predictions.  Judging that conformity is very important when evaluating a model, and there's seldom a good alternative: viewing the actual subject-level variability is much more informative than viewing only the standard error bars (and certainly more informative than reading values in a table like a +/-0.71 standard error or a 4.53 between-subjects variance).  
 
-The second graph below suppresses the subject-level information.  Peer into the empty space and imagine all the scenarios that could result in the same summary.  If we had been using a simple linear model instead of a flexible loess, the possibilities get considerably larger.  
+The second graph below suppresses the subject-level information.  Peer into the empty space and imagine all the scenarios that could result in the same summary lines.  If we had been using a simple linear model instead of a flexible loess, the possibilities get considerably larger.  
 
 Furthermore, it can be difficult to judge results from only standard error bands or bars.  Compare the second and third graphs below.  Even when they're next to each other, they don't look that different to us.  And if the graphs were scaled or sized differently, we'd have trouble noticing that the second graphs' standard error bars are considerably loser.  And yet its variance is twice as large, which is easier to determine from the fourth graph (which again supplements standard errors with individual subjects) than the third (which doesn't).
 
@@ -74,10 +74,14 @@ Objective impressions are facilitated by the subject data, such as few responses
 
 ![plot of chunk ThinnedGrayscale](FigureRmd/ThinnedGrayscale1.png) ![plot of chunk ThinnedGrayscale](FigureRmd/ThinnedGrayscale2.png) ![plot of chunk ThinnedGrayscale](FigureRmd/ThinnedGrayscale3.png) ![plot of chunk ThinnedGrayscale](FigureRmd/ThinnedGrayscale4.png) ![plot of chunk ThinnedGrayscale](FigureRmd/ThinnedGrayscale5.png) 
 
+We'll conclude this longitudinal example with another demonstration of GDA and CDA complementing each other.  We fit two multilevel models: the first allows a quadratic relationship between the response and year (for each group), while the second treats time as categorical.  At the expense of additional complexity and perhaps a more obtuse interpretation, the categorical variable allows a more flexible relationship.  The first graph's prediction bands cannot accommodate TxBrown's deviation from a parabola, while the second graph's can.  The complexity/flexibility tradeoff is roughly balanced, judging from the two models' roughly equivalent fit indices.  Along with previous studies and theoretical justifications, these graphical comparisons can help inform the researcher's decision about which model should be presented (if not both).
+
+
+
 ## --Session Info--
 
 ```
-Report created by wibeasley at Wed 23 Jul 2014 11:20:00 PM EDT, -0400
+Report created by wibeasley at Thu 24 Jul 2014 10:48:20 PM EDT, -0400
 ```
 
 ```
@@ -93,9 +97,11 @@ attached base packages:
 [1] grid      stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] ggplot2_1.0.0      gridExtra_0.9.1    RColorBrewer_1.0-5 scales_0.2.4       plyr_1.8.1         knitr_1.6         
+[1] lme4_1.1-7         Rcpp_0.11.2        Matrix_1.1-4       ggplot2_1.0.0      gridExtra_0.9.1    RColorBrewer_1.0-5 scales_0.2.4      
+[8] plyr_1.8.1         knitr_1.6         
 
 loaded via a namespace (and not attached):
- [1] colorspace_1.2-4 digest_0.6.4     evaluate_0.5.5   formatR_0.10     gtable_0.1.2     labeling_0.2     MASS_7.3-33      munsell_0.4.2   
- [9] proto_0.3-10     Rcpp_0.11.2      reshape2_1.4     stringr_0.6.2    tools_3.1.1     
+ [1] colorspace_1.2-4 digest_0.6.4     evaluate_0.5.5   formatR_0.10     gtable_0.1.2     labeling_0.2     lattice_0.20-29  MASS_7.3-33     
+ [9] minqa_1.2.3      munsell_0.4.2    nlme_3.1-117     nloptr_1.0.0     proto_0.3-10     reshape2_1.4     splines_3.1.1    stringr_0.6.2   
+[17] tools_3.1.1     
 ```
