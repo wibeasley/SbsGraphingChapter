@@ -11,6 +11,7 @@ require(gridExtra, quietly=TRUE)
 # require(mgcv, quietly=TRUE)
 require(ggplot2, quietly=TRUE)
 require(lme4, quietly=TRUE)
+require(arm, quietly=TRUE)
 
 ############################
 ## @knitr DeclareGlobals
@@ -248,9 +249,14 @@ ggplot(ds, aes(x=Year, y=YAlternate, group=SubjectTag, color=GroupV3, fill=Group
 
 fitQuadratic <- lmer(Y ~ 1 + GroupV3*TimePoint + GroupV3*TimePointSq + (1|SubjectTag), data=ds)
 # summary(fitQuadratic)
+arm::extractDIC(fitQuadratic)
+stats::extractAIC(fitQuadratic)
+arm::se.fixef(fitCategorical)
 
 fitCategorical <- lmer(Y ~ 1 + GroupV3*TimePointF + (1|SubjectTag), data=ds)
 # summary(fitCategorical)
+stats::extractAIC(fitCategorical)
+arm::se.fixef(fitCategorical)
 
 dsPredict <- base::expand.grid(GroupV3=unique(ds$GroupV3), TimePoint=unique(ds$TimePoint))
 dsPredict$TimePointSq <- dsPredict$TimePoint^2
